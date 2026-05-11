@@ -15,11 +15,21 @@ from features.quiz_generator import generate_quiz
 
 load_dotenv()
 
+st.set_page_config(
+    page_title="AI Study Copilot",
+    page_icon="01",
+    layout="wide"
+)
+
 st.title("Study Assistant Agent")
 
 @st.cache_resource(show_spinner=False)
 def load_embeddings() :
     get_embeddings()
+
+@st.cache_resource(show_spinner=False)
+def build_vectorstores(chunks, embeddings) :
+    create_vectorstores(chunks, embeddings)
 
 if "processed" not in st.session_state :
     st.session_state.processed = False
@@ -70,7 +80,7 @@ if uploaded_file :
             chunks = split_documents(documents)
 
             embeddings = load_embeddings()
-            retriever = (create_vectorstores(chunks, embeddings)).as_retriever(search_kwargs={'k': 4})
+            retriever = (build_vectorstores(chunks, embeddings)).as_retriever(search_kwargs={'k': 4})
 
             qa_chain = create_qa_chain(retriever)
 

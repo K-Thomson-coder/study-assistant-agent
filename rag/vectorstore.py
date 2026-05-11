@@ -1,7 +1,7 @@
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import FAISS
 
 def create_vectorstores(chunks, embeddings) :
-    db = Chroma.from_documents(
+    db = FAISS.from_documents(
         documents=chunks,
         embedding=embeddings
     )

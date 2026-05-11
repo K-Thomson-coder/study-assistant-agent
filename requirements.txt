@@ -8,3 +8,4 @@ python-dotenv
 sentence-transformers
 torchvision
 google-genai==1.75.0
+faiss-cpu
