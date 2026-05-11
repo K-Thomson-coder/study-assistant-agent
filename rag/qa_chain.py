@@ -1,11 +1,12 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
 def create_qa_chain(retriever) :
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash"
+        model="gemini-3.1-flash-lite",
+        temperature=0.2
         )
     
     def format_docs(docs) :
@@ -24,7 +25,7 @@ def create_qa_chain(retriever) :
     
     chain = (
         {
-            "context": retriever | format_docs,
+            "context": retriever | RunnableLambda(format_docs),
             "question": RunnablePassthrough()
         }
         | prompt
