@@ -25,20 +25,16 @@ st.title("Study Assistant Agent")
 
 @st.cache_resource(show_spinner=False)
 def load_embeddings() :
-    get_embeddings()
-
-@st.cache_resource(show_spinner=False)
-def build_vectorstores(chunks, embeddings) :
-    create_vectorstores(chunks, embeddings)
+    return get_embeddings()
 
 if "processed" not in st.session_state :
     st.session_state.processed = False
 if "documents" not in st.session_state :
-    st.session_state.documents = False
+    st.session_state.documents = None
 if "vectorstore" not in st.session_state :
-    st.session_state.vectorstore = False
+    st.session_state.vectorstore = None
 if "qa_chain" not in st.session_state :
-    st.session_state.qa_chain = False
+    st.session_state.qa_chain = None
 if "current_file" not in st.session_state :
     st.session_state.current_file = None
 
@@ -80,9 +76,12 @@ if uploaded_file :
             chunks = split_documents(documents)
 
             embeddings = load_embeddings()
-            retriever = (build_vectorstores(chunks, embeddings)).as_retriever(search_kwargs={'k': 4})
+            retriever = create_vectorstores(chunks, embeddings)
 
-            qa_chain = create_qa_chain(retriever)
+            if embeddings is None :
+                raise ValueError("Embeddings are None!")
+
+            qa_chain = create_qa_chain(retriever.as_retriever(search_kwargs={'k': 4}))
 
             st.session_state.documents = documents
             st.session_state.vectorstore = retriever
@@ -111,7 +110,7 @@ if uploaded_file :
                 response = st.session_state.qa_chain.invoke(question)
                 answer = response.content
 
-                st.write(answer)
+                st.write(answer[0]['text'])
 
     elif option == "Summarize" :
         
@@ -126,7 +125,7 @@ if uploaded_file :
 
                 summary = summarize_text(text)
 
-                st.write(summary['text'])
+                st.write(summary[0]['text'])
 
     elif option == "Generate Quiz" :
 
